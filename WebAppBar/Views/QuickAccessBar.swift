@@ -1,46 +1,110 @@
 import SwiftUI
 
 // MARK: - 底部快捷访问栏
-// 常用网站一键跳转，替换当前 WebView 内容
 struct QuickAccessBar: View {
     @ObservedObject var viewModel: WebViewModel
+    @ObservedObject var store: SiteStore
     @Binding var inputText: String
-
-    // 快捷按钮配置：显示名称、SF Symbol 图标、对应快捷名
-    private let shortcuts: [(name: String, icon: String, key: String)] = [
-        ("GPT", "brain.head.profile", "gpt"),
-        ("B站", "play.rectangle.fill", "b"),
-        ("X", "at", "x"),
-        ("微博", "newspaper.fill", "wb"),
-        ("YouTube", "play.circle.fill", "yt"),
-        ("GitHub", "chevron.left.forwardslash.chevron.right", "gh"),
-        ("知乎", "text.bubble.fill", "zhihu"),
-    ]
+    var onEdit: () -> Void
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(shortcuts, id: \.key) { shortcut in
-                Button(action: {
-                    inputText = shortcut.key
-                    viewModel.loadURL(shortcut.key)
-                }) {
-                    VStack(spacing: 2) {
-                        Image(systemName: shortcut.icon)
-                            .font(.system(size: 14))
-                            .frame(height: 16)
-                        Text(shortcut.name)
-                            .font(.system(size: 9))
-                            .lineLimit(1)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.borderless)
-                .help(shortcut.name)
+            if store.sites.isEmpty {
+                emptyState
+            } else {
+                siteButtons
             }
+
+            Divider()
+                .frame(height: 28)
+                .padding(.horizontal, 2)
+
+            // 编辑按钮
+            Button(action: onEdit) {
+                VStack(spacing: 2) {
+                    Image(systemName: "square.and.pencil")
+                        .font(.system(size: 14))
+                        .frame(height: 16)
+                    Text("编辑")
+                        .font(.system(size: 9))
+                        .lineLimit(1)
+                }
+                .frame(width: 44)
+                .padding(.vertical, 6)
+                .contentShape(Rectangle())
+                .foregroundStyle(Color.secondary)
+            }
+            .buttonStyle(.borderless)
+            .help("编辑网站")
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 2)
+    }
+
+    private var siteButtons: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 0) {
+                ForEach(store.sites) { site in
+                    let isSelected = viewModel.selectedTab == site.key
+                    Button(action: {
+                        viewModel.switchTab(to: site.key)
+                        inputText = viewModel.webViews[site.key]?.url?.absoluteString ?? site.key
+                    }) {
+                        VStack(spacing: 2) {
+                            SiteFaviconView(site: site, size: 16, cornerRadius: 4)
+                                .frame(height: 16)
+                            Text(site.name)
+                                .font(.system(size: 9))
+                                .lineLimit(1)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(minWidth: 44)
+                        .padding(.vertical, 6)
+                        .contentShape(Rectangle())
+                        .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+                    }
+                    .buttonStyle(.borderless)
+                    .help(site.name)
+                }
+            }
+        }
+    }
+
+    private var emptyState: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "square.dashed")
+                .font(.system(size: 13))
+                .foregroundStyle(.tertiary)
+            Text("暂无网站，点击编辑添加")
+                .font(.system(size: 11))
+                .foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 6)
+    }
+}
+
+struct SiteFaviconView: View {
+    let site: SiteItem
+    let size: CGFloat
+    let cornerRadius: CGFloat
+
+    var body: some View {
+        AsyncImage(url: site.faviconURL) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFit()
+            default:
+                Image(systemName: "globe")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(.secondary)
+                    .padding(size * 0.12)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
 }

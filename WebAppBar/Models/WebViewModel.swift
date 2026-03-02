@@ -3,48 +3,94 @@ import WebKit
 import Combine
 
 // MARK: - WebView 状态管理
-// 负责 WebView 的所有状态跟踪和操作指令
 final class WebViewModel: ObservableObject {
-    // 地址栏当前显示的文本
     @Published var urlString: String = ""
-    // 网页加载状态
     @Published var isLoading: Bool = false
-    // 导航能力
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
-    // 当前 URL 和页面标题
     @Published var currentURL: String = ""
     @Published var pageTitle: String = ""
-    // 加载进度 0.0 ~ 1.0
     @Published var estimatedProgress: Double = 0
-    // 历史记录（最近访问）
     @Published var history: [HistoryItem] = []
 
-    // 对 WKWebView 的弱引用，由 NSViewRepresentable 设置
-    weak var webView: WKWebView?
+    // 当前选中的 tab key
+    @Published var selectedTab: String = ""
 
-    // 加载 URL（通过 ShortcutManager 解析输入）
+    // 所有 tab 的 WKWebView 实例，由 WebViewRepresentable 注入
+    var webViews: [String: WKWebView] = [:]
+
+    // 已完成首次加载的 tab，避免重复 load 初始 URL
+    var loadedTabs: Set<String> = []
+
+    var currentWebView: WKWebView? { webViews[selectedTab] }
+
+    func switchTab(to key: String) {
+        guard key != selectedTab else { return }
+        selectedTab = key
+        syncActiveTabState()
+    }
+
+    /// 将当前活跃 WebView 的状态同步到 published properties
+    func syncActiveTabState() {
+        guard let wv = currentWebView else { return }
+        DispatchQueue.main.async {
+            self.isLoading = wv.isLoading
+            self.canGoBack = wv.canGoBack
+            self.canGoForward = wv.canGoForward
+            self.currentURL = wv.url?.absoluteString ?? ""
+            self.pageTitle = wv.title ?? ""
+            self.estimatedProgress = wv.estimatedProgress
+        }
+    }
+
     func loadURL(_ input: String) {
         let resolved = ShortcutManager.shared.resolve(input)
         guard let url = URL(string: resolved) else { return }
-        webView?.load(URLRequest(url: url))
+        currentWebView?.load(URLRequest(url: url))
     }
 
-    func goBack() { webView?.goBack() }
-    func goForward() { webView?.goForward() }
-    func reload() { webView?.reload() }
-    func stopLoading() { webView?.stopLoading() }
+    func goBack() { currentWebView?.goBack() }
+    func goForward() { currentWebView?.goForward() }
+    func reload() { currentWebView?.reload() }
+    func stopLoading() { currentWebView?.stopLoading() }
 
-    // 添加历史记录
     func addHistory(title: String, url: String) {
         guard !url.isEmpty else { return }
         let item = HistoryItem(title: title.isEmpty ? url : title, url: url)
-        // 去重：移除相同 URL 的旧记录
         history.removeAll { $0.url == url }
         history.insert(item, at: 0)
-        // 保留最近 50 条
         if history.count > 50 {
             history = Array(history.prefix(50))
+        }
+    }
+
+    // MARK: - 动态 tab 管理
+
+    /// 删除 WebView 及对应状态，由 WebViewRepresentable 调用
+    func removeWebView(forKey key: String) {
+        webViews.removeValue(forKey: key)
+        loadedTabs.remove(key)
+    }
+
+    /// sites 列表变更时调用：若当前 tab 被删除，切换到第一个可用 tab
+    func handleSitesChanged(newSites: [SiteItem]) {
+        let newKeys = Set(newSites.map(\.key))
+        // 清理已不存在的 loadedTabs 记录
+        loadedTabs = loadedTabs.intersection(newKeys)
+
+        if newKeys.contains(selectedTab) { return }
+
+        // 当前 tab 已被删除
+        if let first = newSites.first {
+            switchTab(to: first.key)
+        } else {
+            selectedTab = ""
+            isLoading = false
+            canGoBack = false
+            canGoForward = false
+            currentURL = ""
+            pageTitle = ""
+            estimatedProgress = 0
         }
     }
 }

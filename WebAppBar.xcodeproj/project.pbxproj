@@ -15,6 +15,11 @@
 		A10000060000000000000006 /* QuickAccessBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000060000000000000006 /* QuickAccessBar.swift */; };
 		A10000070000000000000007 /* WebViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000070000000000000007 /* WebViewRepresentable.swift */; };
 		A10000080000000000000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000080000000000000008 /* Assets.xcassets */; };
+		A10000090000000000000009 /* SiteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000011 /* SiteItem.swift */; };
+		A1000000000000000000000A /* SiteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000012 /* SiteStore.swift */; };
+		A1000000000000000000000B /* SiteEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000013 /* SiteEditView.swift */; };
+		A1000000000000000000000C /* SiteDetailEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000014 /* SiteDetailEditView.swift */; };
+		A1000000000000000000000D /* SiteIconPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000015 /* SiteIconPicker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +33,11 @@
 		A20000080000000000000008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A20000090000000000000009 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2000000000000000000000A /* WebAppBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WebAppBar.entitlements; sourceTree = "<group>"; };
+		BB0000000000000000000011 /* SiteItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteItem.swift; sourceTree = "<group>"; };
+		BB0000000000000000000012 /* SiteStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteStore.swift; sourceTree = "<group>"; };
+		BB0000000000000000000013 /* SiteEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteEditView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000014 /* SiteDetailEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteDetailEditView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000015 /* SiteIconPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteIconPicker.swift; sourceTree = "<group>"; };
 		A3000000000000000000000B /* WebAppBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebAppBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -68,6 +78,8 @@
 			children = (
 				A20000020000000000000002 /* WebViewModel.swift */,
 				A20000030000000000000003 /* ShortcutManager.swift */,
+				BB0000000000000000000011 /* SiteItem.swift */,
+				BB0000000000000000000012 /* SiteStore.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -79,6 +91,9 @@
 				A20000050000000000000005 /* NavigationBar.swift */,
 				A20000060000000000000006 /* QuickAccessBar.swift */,
 				A20000070000000000000007 /* WebViewRepresentable.swift */,
+				BB0000000000000000000013 /* SiteEditView.swift */,
+				BB0000000000000000000014 /* SiteDetailEditView.swift */,
+				BB0000000000000000000015 /* SiteIconPicker.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -168,6 +183,11 @@
 				A10000050000000000000005 /* NavigationBar.swift in Sources */,
 				A10000060000000000000006 /* QuickAccessBar.swift in Sources */,
 				A10000070000000000000007 /* WebViewRepresentable.swift in Sources */,
+				A10000090000000000000009 /* SiteItem.swift in Sources */,
+				A1000000000000000000000A /* SiteStore.swift in Sources */,
+				A1000000000000000000000B /* SiteEditView.swift in Sources */,
+				A1000000000000000000000C /* SiteDetailEditView.swift in Sources */,
+				A1000000000000000000000D /* SiteIconPicker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
