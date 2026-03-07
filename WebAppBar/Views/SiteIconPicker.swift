@@ -19,7 +19,7 @@ struct SiteIconPicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("选择图标")
+            Text("Choose icon")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -42,10 +42,10 @@ struct SiteIconPicker: View {
             }
 
             HStack(spacing: 6) {
-                Text("自定义：")
+                Text("Custom:")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                TextField("SF Symbol 名称", text: $selected)
+                TextField("SF Symbol name", text: $selected)
                     .textFieldStyle(.roundedBorder)
                     .font(.caption)
                 if !selected.isEmpty {

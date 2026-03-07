@@ -1,7 +1,8 @@
 import SwiftUI
 import WebKit
+import AppKit
 
-// MARK: - 多 WebView 容器
+// MARK: - Multi WebView container
 struct WebViewRepresentable: NSViewRepresentable {
     @ObservedObject var viewModel: WebViewModel
     let sites: [SiteItem]
@@ -25,7 +26,7 @@ struct WebViewRepresentable: NSViewRepresentable {
         let currentKeys = Set(viewModel.webViews.keys)
         let newKeys = Set(sites.map(\.key))
 
-        // 删除已移除的 WebView
+        // Remove WebViews for removed sites
         for key in currentKeys.subtracting(newKeys) {
             if let wv = viewModel.webViews[key] {
                 wv.removeFromSuperview()
@@ -34,12 +35,12 @@ struct WebViewRepresentable: NSViewRepresentable {
             }
         }
 
-        // 添加新增的 WebView
+        // Add WebViews for new sites
         for site in sites where !currentKeys.contains(site.key) {
             addWebView(for: site, to: nsView, coordinator: context.coordinator)
         }
 
-        // 更新可见性
+        // Update visibility
         let selected = viewModel.selectedTab
         for (key, wv) in viewModel.webViews {
             let shouldShow = key == selected
@@ -61,6 +62,7 @@ struct WebViewRepresentable: NSViewRepresentable {
 
     private func addWebView(for site: SiteItem, to container: NSView, coordinator: Coordinator) {
         let config = WKWebViewConfiguration()
+        config.preferences.javaScriptCanOpenWindowsAutomatically = true
         let prefs = WKWebpagePreferences()
         prefs.allowsContentJavaScript = true
         config.defaultWebpagePreferences = prefs
@@ -84,7 +86,7 @@ struct WebViewRepresentable: NSViewRepresentable {
         viewModel.webViews[site.key] = webView
         coordinator.observe(webView, key: site.key)
 
-        // 预加载选中 tab，其余懒加载
+        // Preload selected tab, lazy load others
         if site.key == viewModel.selectedTab {
             if let url = URL(string: site.url) {
                 webView.load(URLRequest(url: url))
@@ -93,10 +95,68 @@ struct WebViewRepresentable: NSViewRepresentable {
         }
     }
 
+    // MARK: - Popup delegate（站点用 window.open 开的登录弹窗，独立 delegate 减少关窗崩溃）
+    private class PopupDelegate: NSObject, WKNavigationDelegate, WKUIDelegate, NSWindowDelegate {
+        weak var window: NSWindow?
+        var onClose: ((NSWindow, WKWebView?) -> Void)?
+
+        init(window: NSWindow) {
+            self.window = window
+            super.init()
+        }
+
+        /// 页面调 window.close() 时（如登录成功）关掉弹窗
+        func webViewDidClose(_ webView: WKWebView) {
+            window?.close()
+        }
+
+        func windowWillClose(_ notification: Notification) {
+            guard let win = notification.object as? NSWindow else { return }
+            win.parent?.removeChildWindow(win)
+            let webView = win.contentView as? WKWebView
+            win.contentView = nil
+            webView?.navigationDelegate = nil
+            webView?.uiDelegate = nil
+            let callback = onClose
+            onClose = nil
+            DispatchQueue.main.async { callback?(win, webView) }
+        }
+
+        func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+            let alert = NSAlert()
+            alert.messageText = message
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+            completionHandler()
+        }
+        func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+            let alert = NSAlert()
+            alert.messageText = message
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "OK")
+            alert.addButton(withTitle: "Cancel")
+            completionHandler(alert.runModal() == .alertFirstButtonReturn)
+        }
+        func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
+            let alert = NSAlert()
+            alert.messageText = prompt
+            alert.alertStyle = .informational
+            let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24))
+            textField.stringValue = defaultText ?? ""
+            alert.accessoryView = textField
+            alert.addButton(withTitle: "OK")
+            alert.addButton(withTitle: "Cancel")
+            completionHandler(alert.runModal() == .alertFirstButtonReturn ? textField.stringValue : nil)
+        }
+    }
+
     // MARK: - Coordinator
     class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         var viewModel: WebViewModel
         private var observations: [String: [NSKeyValueObservation]] = [:]
+        private var popupByWindow: [ObjectIdentifier: PopupDelegate] = [:]
+        private var pendingReleasePopupWebViews: [WKWebView] = []
 
         init(viewModel: WebViewModel) {
             self.viewModel = viewModel
@@ -156,16 +216,76 @@ struct WebViewRepresentable: NSViewRepresentable {
 
         // MARK: - WKUIDelegate
 
+        /// 标准弹窗：返回 WKWebView 让 WebKit 往里加载，页面才能正常显示（return nil 会白屏）。
+        /// 关窗时用 windowWillClose 里「先移出 webview、延迟释放」尽量减轻崩溃。
         func webView(
             _ webView: WKWebView,
             createWebViewWith configuration: WKWebViewConfiguration,
             for navigationAction: WKNavigationAction,
             windowFeatures: WKWindowFeatures
         ) -> WKWebView? {
-            if let url = navigationAction.request.url {
-                webView.load(URLRequest(url: url))
+            guard navigationAction.targetFrame == nil else { return nil }
+
+            // 已有可见弹窗时复用该窗口：换上新 WKWebView 并返回，让 WebKit 往这个新 webview 加载本次请求，避免多窗口
+            for (_, delegate) in popupByWindow {
+                if let w = delegate.window, w.isVisible,
+                   let oldWv = w.contentView as? WKWebView {
+                    pendingReleasePopupWebViews.append(oldWv)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                        self?.pendingReleasePopupWebViews.removeAll { $0 === oldWv }
+                    }
+                    let newWv = WKWebView(frame: .zero, configuration: configuration)
+                    newWv.customUserAgent = webView.customUserAgent
+                    newWv.allowsBackForwardNavigationGestures = true
+                    newWv.translatesAutoresizingMaskIntoConstraints = false
+                    newWv.navigationDelegate = delegate
+                    newWv.uiDelegate = delegate
+                    w.contentView = newWv
+                    return newWv
+                }
             }
-            return nil
+
+            configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
+            let popupWebView = WKWebView(frame: .zero, configuration: configuration)
+            popupWebView.customUserAgent = webView.customUserAgent
+            popupWebView.allowsBackForwardNavigationGestures = true
+            popupWebView.translatesAutoresizingMaskIntoConstraints = false
+
+            // 文档建议 Menubar App 用 NSPanel 作为弹窗，焦点/隐藏行为更稳定
+            let popupPanel = NSPanel(
+                contentRect: NSRect(x: 0, y: 0, width: 460, height: 740),
+                styleMask: [.titled, .closable, .miniaturizable, .resizable],
+                backing: .buffered,
+                defer: false
+            )
+            popupPanel.title = "Login"
+            popupPanel.center()
+            popupPanel.contentView = popupWebView
+            if let parentWindow = NSApp.keyWindow {
+                parentWindow.addChildWindow(popupPanel, ordered: .above)
+            }
+            popupPanel.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+
+            let popupDelegate = PopupDelegate(window: popupPanel)
+            popupDelegate.onClose = { [weak self] win, wv in
+                self?.removePopup(window: win, webview: wv)
+            }
+            popupPanel.delegate = popupDelegate
+            popupWebView.navigationDelegate = popupDelegate
+            popupWebView.uiDelegate = popupDelegate
+
+            popupByWindow[ObjectIdentifier(popupPanel)] = popupDelegate
+            return popupWebView
+        }
+
+        private func removePopup(window: NSWindow, webview: WKWebView?) {
+            popupByWindow.removeValue(forKey: ObjectIdentifier(window))
+            guard let wv = webview else { return }
+            pendingReleasePopupWebViews.append(wv)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                self?.pendingReleasePopupWebViews.removeAll { $0 === wv }
+            }
         }
 
         func webView(
@@ -177,7 +297,7 @@ struct WebViewRepresentable: NSViewRepresentable {
             let alert = NSAlert()
             alert.messageText = message
             alert.alertStyle = .informational
-            alert.addButton(withTitle: "确定")
+            alert.addButton(withTitle: "OK")
             alert.runModal()
             completionHandler()
         }
@@ -191,8 +311,8 @@ struct WebViewRepresentable: NSViewRepresentable {
             let alert = NSAlert()
             alert.messageText = message
             alert.alertStyle = .informational
-            alert.addButton(withTitle: "确定")
-            alert.addButton(withTitle: "取消")
+            alert.addButton(withTitle: "OK")
+            alert.addButton(withTitle: "Cancel")
             let response = alert.runModal()
             completionHandler(response == .alertFirstButtonReturn)
         }
@@ -210,8 +330,8 @@ struct WebViewRepresentable: NSViewRepresentable {
             let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24))
             textField.stringValue = defaultText ?? ""
             alert.accessoryView = textField
-            alert.addButton(withTitle: "确定")
-            alert.addButton(withTitle: "取消")
+            alert.addButton(withTitle: "OK")
+            alert.addButton(withTitle: "Cancel")
             let response = alert.runModal()
             completionHandler(response == .alertFirstButtonReturn ? textField.stringValue : nil)
         }

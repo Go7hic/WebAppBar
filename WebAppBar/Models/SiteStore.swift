@@ -52,7 +52,7 @@ final class SiteStore: ObservableObject {
 
     // MARK: - Validation
 
-    /// 检查 key 是否在现有 sites 中已被占用（排除自身）
+    /// Whether key is already used by another site (excluding given id)
     func isKeyTaken(_ key: String, excluding id: UUID? = nil) -> Bool {
         sites.contains { $0.key == key && $0.id != id }
     }

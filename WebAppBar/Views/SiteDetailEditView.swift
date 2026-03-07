@@ -1,6 +1,6 @@
 import SwiftUI
 
-// 用于新建或编辑单个网站
+// New or edit single site
 struct SiteDetailEditView: View {
     @ObservedObject var store: SiteStore
     var existing: SiteItem?
@@ -25,18 +25,18 @@ struct SiteDetailEditView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 顶栏
+            // Header
             HStack {
-                Button("取消", action: onDismiss)
+                Button("Cancel", action: onDismiss)
                     .buttonStyle(.borderless)
                     .foregroundStyle(.secondary)
 
                 Spacer()
-                Text(isEditing ? "编辑网站" : "添加网站")
+                Text(isEditing ? "Edit site" : "Add site")
                     .font(.headline)
                 Spacer()
 
-                Button("保存") { save() }
+                Button("Save") { save() }
                     .buttonStyle(.borderless)
                     .foregroundStyle(Color.accentColor)
                     .fontWeight(.semibold)
@@ -49,7 +49,7 @@ struct SiteDetailEditView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    // 图标预览
+                    // Icon preview
                     HStack {
                         Spacer()
                         ZStack {
@@ -72,20 +72,20 @@ struct SiteDetailEditView: View {
                         Spacer()
                     }
                     .padding(.top, 8)
-                    Text("图标会根据网站地址自动获取（favicon.so）")
+                    Text("Icon is fetched automatically from the site URL (favicon.so)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
 
-                    // 表单字段
+                    // Form fields
                     VStack(alignment: .leading, spacing: 12) {
-                        fieldGroup(label: "显示名称", placeholder: "如：GPT") {
-                            TextField("显示名称", text: $name)
+                        fieldGroup(label: "Display name", placeholder: "e.g. GPT") {
+                            TextField("Display name", text: $name)
                                 .textFieldStyle(.roundedBorder)
                         }
 
-                        fieldGroup(label: "简称 (Tab Key)", placeholder: "如：gpt", error: keyError) {
-                            TextField("简称", text: $key)
+                        fieldGroup(label: "Shortcut (Tab key)", placeholder: "e.g. gpt", error: keyError) {
+                            TextField("Shortcut", text: $key)
                                 .textFieldStyle(.roundedBorder)
                                 .onChange(of: key) { _, v in
                                     key = v.lowercased().filter { $0.isLetter || $0.isNumber || $0 == "-" }
@@ -93,7 +93,7 @@ struct SiteDetailEditView: View {
                                 }
                         }
 
-                        fieldGroup(label: "网站地址", placeholder: "https://example.com", error: urlError) {
+                        fieldGroup(label: "URL", placeholder: "https://example.com", error: urlError) {
                             TextField("URL", text: $url)
                                 .textFieldStyle(.roundedBorder)
                                 .onChange(of: url) { _, _ in validateURL() }
@@ -142,13 +142,13 @@ struct SiteDetailEditView: View {
             keyError = nil; return
         }
         keyError = store.isKeyTaken(trimmed, excluding: existing?.id)
-            ? "该简称已被占用" : nil
+            ? "This shortcut is already in use" : nil
     }
 
     private func validateURL() {
         let trimmed = url.trimmingCharacters(in: .whitespaces)
         if trimmed.isEmpty { urlError = nil; return }
-        urlError = SiteItem.host(from: trimmed) == nil ? "URL 格式不正确" : nil
+        urlError = SiteItem.host(from: trimmed) == nil ? "Invalid URL format" : nil
     }
 
     private func save() {

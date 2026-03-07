@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-// MARK: - AppDelegate：右键菜单
+// MARK: - AppDelegate: context menu
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSEvent.addLocalMonitorForEvents(matching: .rightMouseDown) { [weak self] event in
@@ -16,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func isStatusBarEvent(_ event: NSEvent) -> Bool {
         guard let window = event.window else { return false }
-        // MenuBarExtra 的窗口类名含 "StatusBar"
+        // MenuBarExtra window class name contains "StatusBar"
         return NSStringFromClass(type(of: window)).contains("StatusBar")
     }
 
@@ -33,7 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-// MARK: - 应用主入口
+// MARK: - App entry
 @main
 struct WebAppBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate

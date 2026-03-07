@@ -26,20 +26,20 @@ struct SiteEditView: View {
     @ViewBuilder
     private var mainList: some View {
         VStack(spacing: 0) {
-            // 顶栏
+            // Header
             HStack {
                 Button(action: onDismiss) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 13, weight: .semibold))
-                        Text("返回")
+                        Text("Back")
                     }
                 }
                 .buttonStyle(.borderless)
                 .foregroundStyle(.secondary)
 
                 Spacer()
-                Text("编辑网站")
+                Text("Edit sites")
                     .font(.headline)
                 Spacer()
 
@@ -66,9 +66,9 @@ struct SiteEditView: View {
         .overlay {
             if showingDeleteAllAlert {
                 confirmOverlay(
-                    title: "删除全部网站",
-                    message: "将删除所有网站，底部快捷栏会变为空白。此操作无法撤销。",
-                    confirmTitle: "删除"
+                    title: "Delete all sites",
+                    message: "All sites will be removed and the shortcut bar will be empty. This cannot be undone.",
+                    confirmTitle: "Delete"
                 ) {
                     store.deleteAll()
                     showingDeleteAllAlert = false
@@ -77,9 +77,9 @@ struct SiteEditView: View {
                 }
             } else if let site = pendingDeleteSite {
                 confirmOverlay(
-                    title: "删除网站",
-                    message: "将删除「\(site.name)」，此操作无法撤销。",
-                    confirmTitle: "删除"
+                    title: "Delete site",
+                    message: "“\(site.name)” will be removed. This cannot be undone.",
+                    confirmTitle: "Delete"
                 ) {
                     store.delete(site)
                     pendingDeleteSite = nil
@@ -96,15 +96,15 @@ struct SiteEditView: View {
             Image(systemName: "square.grid.2x2")
                 .font(.system(size: 48))
                 .foregroundStyle(.tertiary)
-            Text("还没有网站")
+            Text("No sites yet")
                 .font(.title3)
                 .foregroundStyle(.secondary)
-            Text("点击下方按钮添加你常用的网站")
+            Text("Tap the button below to add your sites")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
             Button(action: { showingAdd = true }) {
-                Label("添加网站", systemImage: "plus.circle.fill")
+                Label("Add site", systemImage: "plus.circle.fill")
                     .font(.body)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
@@ -140,7 +140,7 @@ struct SiteEditView: View {
                                 .foregroundStyle(.secondary)
                         }
                         .buttonStyle(.borderless)
-                        .help("编辑 \(site.name)")
+                        .help("Edit \(site.name)")
 
                         Button(action: { pendingDeleteSite = site }) {
                             Image(systemName: "trash")
@@ -148,7 +148,7 @@ struct SiteEditView: View {
                                 .foregroundStyle(.red)
                         }
                         .buttonStyle(.borderless)
-                        .help("删除 \(site.name)")
+                        .help("Delete \(site.name)")
                     }
                     .padding(.vertical, 3)
                 }
@@ -159,7 +159,7 @@ struct SiteEditView: View {
             Divider()
 
             Button(action: { showingDeleteAllAlert = true }) {
-                Label("删除全部", systemImage: "trash")
+                Label("Delete all", systemImage: "trash")
                     .font(.callout)
                     .foregroundStyle(.red)
             }
@@ -191,7 +191,7 @@ struct SiteEditView: View {
 
                 HStack(spacing: 10) {
                     Spacer()
-                    Button("取消", action: onCancel)
+                    Button("Cancel", action: onCancel)
                         .buttonStyle(.bordered)
                     Button(confirmTitle, action: onConfirm)
                         .buttonStyle(.borderedProminent)

@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 底部快捷访问栏
+// MARK: - Quick access bar
 struct QuickAccessBar: View {
     @ObservedObject var viewModel: WebViewModel
     @ObservedObject var store: SiteStore
@@ -19,13 +19,13 @@ struct QuickAccessBar: View {
                 .frame(height: 28)
                 .padding(.horizontal, 2)
 
-            // 编辑按钮
+            // Edit button
             Button(action: onEdit) {
                 VStack(spacing: 2) {
                     Image(systemName: "square.and.pencil")
                         .font(.system(size: 14))
                         .frame(height: 16)
-                    Text("编辑")
+                    Text("Edit")
                         .font(.system(size: 9))
                         .lineLimit(1)
                 }
@@ -35,7 +35,7 @@ struct QuickAccessBar: View {
                 .foregroundStyle(Color.secondary)
             }
             .buttonStyle(.borderless)
-            .help("编辑网站")
+            .help("Edit sites")
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 2)
@@ -75,7 +75,7 @@ struct QuickAccessBar: View {
             Image(systemName: "square.dashed")
                 .font(.system(size: 13))
                 .foregroundStyle(.tertiary)
-            Text("暂无网站，点击编辑添加")
+            Text("No sites — tap Edit to add")
                 .font(.system(size: 11))
                 .foregroundStyle(.tertiary)
         }

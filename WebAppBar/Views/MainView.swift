@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 主视图
+// MARK: - Main view
 struct MainView: View {
     @ObservedObject var viewModel: WebViewModel
     @ObservedObject var store: SiteStore
@@ -29,7 +29,7 @@ struct MainView: View {
                 isInputFocused: $isInputFocused
             )
 
-            // 加载进度条
+            // Loading progress
             ZStack(alignment: .leading) {
                 if viewModel.isLoading {
                     ProgressView(value: viewModel.estimatedProgress)
@@ -40,7 +40,7 @@ struct MainView: View {
             .frame(height: viewModel.isLoading ? 2 : 0)
             .animation(.easeInOut(duration: 0.2), value: viewModel.isLoading)
 
-            // 网页区域 / 空状态
+            // Web area / empty state
             if store.sites.isEmpty {
                 emptyWebArea
             } else {
@@ -59,7 +59,7 @@ struct MainView: View {
         }
         .background(.background)
         .onAppear {
-            // 首次出现时同步 selectedTab 为第一个 site
+            // Sync selectedTab to first site on appear
             if viewModel.selectedTab.isEmpty, let first = store.sites.first {
                 viewModel.selectedTab = first.key
             }
@@ -82,16 +82,16 @@ struct MainView: View {
             Image(systemName: "globe.slash")
                 .font(.system(size: 52))
                 .foregroundStyle(.tertiary)
-            Text("没有网站")
+            Text("No sites")
                 .font(.title2)
                 .foregroundStyle(.secondary)
-            Text("点击底部「编辑」按钮添加你常用的网站")
+            Text("Tap \"Edit\" below to add your sites")
                 .font(.callout)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Button(action: { isEditing = true }) {
-                Label("去添加", systemImage: "plus.circle.fill")
+                Label("Add site", systemImage: "plus.circle.fill")
                     .padding(.horizontal, 20)
                     .padding(.vertical, 8)
             }

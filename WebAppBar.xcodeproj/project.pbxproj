@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1000000000000000000000A /* SiteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000012 /* SiteStore.swift */; };
+		A1000000000000000000000B /* SiteEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000013 /* SiteEditView.swift */; };
+		A1000000000000000000000C /* SiteDetailEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000014 /* SiteDetailEditView.swift */; };
+		A1000000000000000000000D /* SiteIconPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000015 /* SiteIconPicker.swift */; };
 		A10000010000000000000001 /* WebAppBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000001 /* WebAppBarApp.swift */; };
 		A10000020000000000000002 /* WebViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000020000000000000002 /* WebViewModel.swift */; };
 		A10000030000000000000003 /* ShortcutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000030000000000000003 /* ShortcutManager.swift */; };
@@ -16,13 +20,10 @@
 		A10000070000000000000007 /* WebViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000070000000000000007 /* WebViewRepresentable.swift */; };
 		A10000080000000000000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000080000000000000008 /* Assets.xcassets */; };
 		A10000090000000000000009 /* SiteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000011 /* SiteItem.swift */; };
-		A1000000000000000000000A /* SiteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000012 /* SiteStore.swift */; };
-		A1000000000000000000000B /* SiteEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000013 /* SiteEditView.swift */; };
-		A1000000000000000000000C /* SiteDetailEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000014 /* SiteDetailEditView.swift */; };
-		A1000000000000000000000D /* SiteIconPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000015 /* SiteIconPicker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A2000000000000000000000A /* WebAppBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WebAppBar.entitlements; sourceTree = "<group>"; };
 		A20000010000000000000001 /* WebAppBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAppBarApp.swift; sourceTree = "<group>"; };
 		A20000020000000000000002 /* WebViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewModel.swift; sourceTree = "<group>"; };
 		A20000030000000000000003 /* ShortcutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutManager.swift; sourceTree = "<group>"; };
@@ -32,13 +33,12 @@
 		A20000070000000000000007 /* WebViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewRepresentable.swift; sourceTree = "<group>"; };
 		A20000080000000000000008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A20000090000000000000009 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A2000000000000000000000A /* WebAppBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WebAppBar.entitlements; sourceTree = "<group>"; };
+		A3000000000000000000000B /* WebAppBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebAppBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB0000000000000000000011 /* SiteItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteItem.swift; sourceTree = "<group>"; };
 		BB0000000000000000000012 /* SiteStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteStore.swift; sourceTree = "<group>"; };
 		BB0000000000000000000013 /* SiteEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteEditView.swift; sourceTree = "<group>"; };
 		BB0000000000000000000014 /* SiteDetailEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteDetailEditView.swift; sourceTree = "<group>"; };
 		BB0000000000000000000015 /* SiteIconPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteIconPicker.swift; sourceTree = "<group>"; };
-		A3000000000000000000000B /* WebAppBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebAppBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,7 +52,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A50000000000000000000000 /* Root */ = {
+		A50000000000000000000000 = {
 			isa = PBXGroup;
 			children = (
 				A50000010000000000000001 /* WebAppBar */,
@@ -150,7 +150,7 @@
 				"zh-Hans",
 				Base,
 			);
-			mainGroup = A50000000000000000000000 /* Root */;
+			mainGroup = A50000000000000000000000;
 			productRefGroup = A50000040000000000000004 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -316,9 +316,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WebAppBar/WebAppBar.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CE8N4Z6AQ3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = WebAppBar/Info.plist;
@@ -340,9 +342,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WebAppBar/WebAppBar.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CE8N4Z6AQ3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = WebAppBar/Info.plist;
@@ -380,7 +384,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
 	rootObject = A90000010000000000000001 /* Project object */;
 }

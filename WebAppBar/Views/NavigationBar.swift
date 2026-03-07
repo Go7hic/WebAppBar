@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-// MARK: - 导航栏
+// MARK: - Navigation bar
 struct NavigationBar: View {
     @ObservedObject var viewModel: WebViewModel
     @Binding var inputText: String
@@ -12,25 +12,25 @@ struct NavigationBar: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            // 后退
+            // Back
             Button(action: { viewModel.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 13, weight: .medium))
             }
             .disabled(!viewModel.canGoBack)
             .buttonStyle(.borderless)
-            .help("后退")
+            .help("Back")
 
-            // 前进
+            // Forward
             Button(action: { viewModel.goForward() }) {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .medium))
             }
             .disabled(!viewModel.canGoForward)
             .buttonStyle(.borderless)
-            .help("前进")
+            .help("Forward")
 
-            // 刷新 / 停止加载
+            // Reload / Stop
             Button(action: {
                 if viewModel.isLoading {
                     viewModel.stopLoading()
@@ -42,9 +42,9 @@ struct NavigationBar: View {
                     .font(.system(size: 12, weight: .medium))
             }
             .buttonStyle(.borderless)
-            .help(viewModel.isLoading ? "停止" : "刷新")
+            .help(viewModel.isLoading ? "Stop" : "Reload")
 
-            // URL 区域：只读 or 编辑
+            // URL area: readonly or edit
             if isURLEditing {
                 urlEditField
             } else {
@@ -55,10 +55,10 @@ struct NavigationBar: View {
         .padding(.vertical, 6)
     }
 
-    // MARK: - 只读 URL 栏
+    // MARK: - Readonly URL bar
     private var urlReadonlyBar: some View {
         HStack(spacing: 4) {
-            Text(inputText.isEmpty ? "无地址" : inputText)
+            Text(inputText.isEmpty ? "No URL" : inputText)
                 .font(.system(size: 12))
                 .lineLimit(1)
                 .truncationMode(.middle)
@@ -71,7 +71,7 @@ struct NavigationBar: View {
                     .foregroundStyle(showCopiedFeedback ? .green : .secondary)
             }
             .buttonStyle(.borderless)
-            .help("复制地址")
+            .help("Copy URL")
             .disabled(inputText.isEmpty)
 
             Button(action: { isURLEditing = true }) {
@@ -80,7 +80,7 @@ struct NavigationBar: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.borderless)
-            .help("编辑地址")
+            .help("Edit URL")
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 4)
@@ -90,10 +90,10 @@ struct NavigationBar: View {
         )
     }
 
-    // MARK: - 编辑 URL 栏
+    // MARK: - Edit URL bar
     private var urlEditField: some View {
         HStack(spacing: 4) {
-            TextField("输入网址或快捷名（如 gpt, b, x）…", text: $inputText)
+            TextField("Enter URL or shortcut (e.g. gpt, b, x)…", text: $inputText)
                 .textFieldStyle(.roundedBorder)
                 .font(.system(size: 13))
                 .focused(isInputFocused)
@@ -126,7 +126,7 @@ struct NavigationBar: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.borderless)
-            .help("取消")
+            .help("Cancel")
         }
     }
 

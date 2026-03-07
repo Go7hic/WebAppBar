@@ -1,12 +1,12 @@
 import Foundation
 
-// MARK: - 短名称映射管理器
+// MARK: - Shortcut key resolver
 final class ShortcutManager {
     static let shared = ShortcutManager()
 
-    // 内置快捷名（不在底栏的补充快捷名，如搜索引擎、其他常用站）
+    // Built-in shortcuts (not shown in bar, e.g. search, common sites)
     private let builtins: [String: String] = [
-        "g":     "https://chatgpt.com",
+        "g":     "https://www.google.com",
         "rd":    "https://www.reddit.com",
         "wiki":  "https://zh.m.wikipedia.org",
         "db":    "https://m.douban.com",
@@ -19,12 +19,12 @@ final class ShortcutManager {
         "ggl":   "https://www.google.com",
     ]
 
-    // 用户 sites 的快捷名（key -> url），由 SiteStore 同步
+    // User sites shortcuts (key -> url), synced by SiteStore
     private var userShortcuts: [String: String] = [:]
 
     private init() {}
 
-    /// 由 SiteStore 在 sites 变更时调用，同步用户自定义快捷名
+    /// Called by SiteStore when sites change; syncs user shortcuts
     func syncUserSites(_ sites: [SiteItem]) {
         var dict: [String: String] = [:]
         for site in sites {
@@ -33,8 +33,8 @@ final class ShortcutManager {
         userShortcuts = dict
     }
 
-    /// 解析用户输入，返回完整 URL 字符串
-    /// 优先级：用户 sites > 内置快捷名 > 已有协议 > 含点号补 https > 当作搜索关键词
+    /// Resolve user input to full URL string.
+    /// Priority: user sites > builtins > existing scheme > add https if has dot > search query
     func resolve(_ input: String) -> String {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return "" }
@@ -56,14 +56,14 @@ final class ShortcutManager {
         return "https://www.google.com/search?q=\(encoded)"
     }
 
-    /// 获取所有快捷名（用于补全提示），用户 sites 优先
+    /// All shortcut keys (for suggestions), user sites first
     func allShortcuts() -> [(key: String, url: String)] {
         var merged = builtins
         for (k, v) in userShortcuts { merged[k] = v }
         return merged.sorted { $0.key < $1.key }.map { (key: $0.key, url: $0.value) }
     }
 
-    /// 根据前缀过滤快捷名（输入时实时提示）
+    /// Filter shortcuts by prefix (live suggestions)
     func suggestions(for prefix: String) -> [(key: String, url: String)] {
         guard !prefix.isEmpty else { return [] }
         let lower = prefix.lowercased()

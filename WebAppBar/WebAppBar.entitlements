@@ -2,11 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- App Sandbox 开启 -->
+    <!-- App Sandbox enabled -->
     <key>com.apple.security.app-sandbox</key>
     <true/>
 
-    <!-- 允许出站网络连接（加载网页必需） -->
+    <!-- Outbound network (required for loading web pages) -->
     <key>com.apple.security.network.client</key>
     <true/>
 </dict>

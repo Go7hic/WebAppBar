@@ -49,7 +49,6 @@ extension SiteItem {
     static let defaults: [SiteItem] = [
         SiteItem(name: "X",       key: "x",     url: "https://x.com",            icon: "at"),
         SiteItem(name: "Google",  key: "ggl",   url: "https://www.google.com",   icon: "globe"),
-        SiteItem(name: "GPT",     key: "gpt",   url: "https://chatgpt.com",      icon: "brain.head.profile"),
         SiteItem(name: "Claude",  key: "claude", url: "https://claude.ai",      icon: "brain.head.profile"),
         SiteItem(name: "Bili",     key: "b",     url: "https://m.bilibili.com",   icon: "play.rectangle.fill"),
         SiteItem(name: "GitHub",  key: "gh",    url: "https://github.com",       icon: "chevron.left.forwardslash.chevron.right"),

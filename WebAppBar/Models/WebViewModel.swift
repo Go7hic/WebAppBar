@@ -2,7 +2,7 @@ import SwiftUI
 import WebKit
 import Combine
 
-// MARK: - WebView 状态管理
+// MARK: - WebView state
 final class WebViewModel: ObservableObject {
     @Published var urlString: String = ""
     @Published var isLoading: Bool = false
@@ -13,13 +13,13 @@ final class WebViewModel: ObservableObject {
     @Published var estimatedProgress: Double = 0
     @Published var history: [HistoryItem] = []
 
-    // 当前选中的 tab key
+    // Selected tab key
     @Published var selectedTab: String = ""
 
-    // 所有 tab 的 WKWebView 实例，由 WebViewRepresentable 注入
+    // WKWebView per tab, injected by WebViewRepresentable
     var webViews: [String: WKWebView] = [:]
 
-    // 已完成首次加载的 tab，避免重复 load 初始 URL
+    // Tabs that have loaded once (avoid reloading initial URL)
     var loadedTabs: Set<String> = []
 
     var currentWebView: WKWebView? { webViews[selectedTab] }
@@ -30,7 +30,7 @@ final class WebViewModel: ObservableObject {
         syncActiveTabState()
     }
 
-    /// 将当前活跃 WebView 的状态同步到 published properties
+    /// Sync active WebView state to published properties
     func syncActiveTabState() {
         guard let wv = currentWebView else { return }
         DispatchQueue.main.async {
@@ -64,23 +64,23 @@ final class WebViewModel: ObservableObject {
         }
     }
 
-    // MARK: - 动态 tab 管理
+    // MARK: - Dynamic tab management
 
-    /// 删除 WebView 及对应状态，由 WebViewRepresentable 调用
+    /// Remove WebView and state; called by WebViewRepresentable
     func removeWebView(forKey key: String) {
         webViews.removeValue(forKey: key)
         loadedTabs.remove(key)
     }
 
-    /// sites 列表变更时调用：若当前 tab 被删除，切换到第一个可用 tab
+    /// Called when sites change; if current tab removed, switch to first
     func handleSitesChanged(newSites: [SiteItem]) {
         let newKeys = Set(newSites.map(\.key))
-        // 清理已不存在的 loadedTabs 记录
+        // Prune loadedTabs for removed sites
         loadedTabs = loadedTabs.intersection(newKeys)
 
         if newKeys.contains(selectedTab) { return }
 
-        // 当前 tab 已被删除
+        // Current tab was removed
         if let first = newSites.first {
             switchTab(to: first.key)
         } else {
@@ -95,7 +95,7 @@ final class WebViewModel: ObservableObject {
     }
 }
 
-// MARK: - 历史记录条目
+// MARK: - History item
 struct HistoryItem: Identifiable, Codable {
     let id: UUID
     let title: String
