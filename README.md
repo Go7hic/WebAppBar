@@ -1,28 +1,28 @@
-# WebAppBar - 菜单栏迷你浏览器
+# WebAppBar - Menu Bar Mini Browser
 
-一个轻量、快速、专注的 macOS 菜单栏迷你浏览器，专为快速访问移动友好网站而设计。
+A lightweight, fast, focused macOS menu bar mini browser designed for quick access to mobile-friendly websites.
 
-## 功能特性
+## Features
 
-- **纯菜单栏应用** — 点击菜单栏 🌐 图标弹出 popover 窗口，无 Dock 图标
-- **内嵌 WebView** — 使用 WKWebView，所有网页在应用内加载，不跳转外部浏览器
-- **智能 URL 补全** — 自动补全 `https://`，无协议头自动添加
-- **快捷名称** — 输入 `gpt`、`b`、`x` 等短名称直接跳转对应网站
-- **搜索回退** — 输入非 URL 文本自动用 Google 搜索
-- **移动端模拟** — User-Agent 设置为 iPhone，网站返回移动端布局
-- **自动聚焦** — 弹出窗口时自动聚焦输入框，即时输入
-- **导航控制** — 后退 / 前进 / 刷新 / 停止按钮
-- **快捷访问栏** — 底部常用网站一键跳转
-- **JS 弹窗支持** — 处理 `alert()` / `confirm()` / `prompt()`
-- **新窗口拦截** — `window.open()` 统一在当前 WebView 内打开
-- **加载进度条** — 实时显示网页加载进度
-- **深色模式** — 自动适配 macOS 系统主题
-- **历史记录** — 自动记录最近 50 条访问历史
+- **Menu bar only** — Click the 🌐 icon in the menu bar to open a popover window; no Dock icon
+- **Embedded WebView** — Uses WKWebView; all pages load in-app without opening external browsers
+- **Smart URL completion** — Auto-completes `https://`; adds protocol when missing
+- **Shortcut names** — Type `gpt`, `b`, `x`, etc. to jump directly to corresponding sites
+- **Search fallback** — Non-URL text is automatically searched via Google
+- **Mobile viewport** — User-Agent set to iPhone for mobile layouts
+- **Auto focus** — Input field auto-focuses when popover opens for immediate typing
+- **Navigation controls** — Back / Forward / Refresh / Stop buttons
+- **Quick access bar** — One-click shortcuts for common sites at the bottom
+- **JS dialog support** — Handles `alert()` / `confirm()` / `prompt()`
+- **New window handling** — `window.open()` opens in the current WebView
+- **Loading progress bar** — Real-time page load progress
+- **Dark mode** — Follows macOS system theme
+- **History** — Keeps last 50 visited URLs
 
-## 快捷名称映射
+## Shortcut Name Mapping
 
-| 快捷名 | 网站 |
-|--------|------|
+| Shortcut | Site |
+|----------|------|
 | `gpt` / `g` | chatgpt.com |
 | `b` | m.bilibili.com |
 | `x` | x.com |
@@ -41,56 +41,49 @@
 | `bing` | bing.com |
 | `ggl` | google.com |
 
-## 系统要求
+## Requirements
 
-- macOS 14.0 (Sonoma) 或更高版本
+- macOS 14.0 (Sonoma) or later
 - Xcode 15.0+
 
-## 项目结构
+## Project Structure
 
 ```
 WebAppBar/
-├── WebAppBarApp.swift           # 应用入口，MenuBarExtra 配置
+├── WebAppBarApp.swift           # App entry, MenuBarExtra config
 ├── Models/
-│   ├── WebViewModel.swift       # WebView 状态管理（加载状态、导航、历史）
-│   └── ShortcutManager.swift    # 快捷名称映射 + URL 智能解析
+│   ├── WebViewModel.swift       # WebView state (loading, navigation, history)
+│   └── ShortcutManager.swift    # Shortcut mapping + URL parsing
 ├── Views/
-│   ├── MainView.swift           # 主界面布局（导航栏 + 进度条 + WebView + 快捷栏）
-│   ├── NavigationBar.swift      # 顶部导航栏（后退/前进/刷新 + URL 输入 + Go）
-│   ├── QuickAccessBar.swift     # 底部快捷网站按钮
-│   └── WebViewRepresentable.swift # WKWebView ↔ SwiftUI 桥接
-├── Assets.xcassets/             # 资源目录
-├── Info.plist                   # 应用配置（含 LSUIElement 隐藏 Dock 图标）
-└── WebAppBar.entitlements       # 权限配置（Sandbox + 网络访问）
+│   ├── MainView.swift           # Main layout (nav bar + progress + WebView + quick bar)
+│   ├── NavigationBar.swift      # Top nav (back/forward/refresh + URL input + Go)
+│   ├── QuickAccessBar.swift     # Bottom quick-access site buttons
+│   └── WebViewRepresentable.swift # WKWebView ↔ SwiftUI bridge
+├── Assets.xcassets/             # Assets
+├── Info.plist                   # App config (LSUIElement for no Dock icon)
+└── WebAppBar.entitlements       # Entitlements (Sandbox + network)
 
-WebAppBar.xcodeproj/            # Xcode 项目文件（可直接打开）
-project.yml                     # XcodeGen 配置（可选，用于重新生成 .xcodeproj）
+WebAppBar.xcodeproj/            # Xcode project (open directly)
+project.yml                     # XcodeGen config (optional, for regenerating .xcodeproj)
 ```
 
-## 快速开始
+## Quick Start
 
-### 方式一：直接打开 Xcode 项目
+### Option 1: Open Xcode project directly
 
 ```bash
 open WebAppBar.xcodeproj
 ```
 
-在 Xcode 中按 `Cmd + R` 运行。
+Press `Cmd + R` in Xcode to run.
 
-### 方式二：使用 XcodeGen 重新生成项目
+### Option 2: Regenerate project with XcodeGen
 
 ```bash
 brew install xcodegen
 xcodegen generate
 open WebAppBar.xcodeproj
 ```
-
-## 已知问题与 Workaround
-
-1. **MenuBarExtra popover 尺寸** — `.menuBarExtraStyle(.window)` 的窗口尺寸由内部 `.frame()` 控制，已设置为 420×640pt
-2. **ScrollView 高度 Bug** — 未使用 ScrollView 嵌套 WebView，避免了已知的高度计算问题
-3. **聚焦延迟** — `onAppear` 中使用 `asyncAfter(deadline: .now() + 0.1)` 延迟聚焦，确保视图完全加载后再激活输入框
-4. **全选文本** — 监听 `NSTextField.textDidBeginEditingNotification` 实现点击地址栏自动全选
 
 ## License
 
