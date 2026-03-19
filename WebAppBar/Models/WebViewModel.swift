@@ -4,6 +4,8 @@ import Combine
 
 // MARK: - WebView state
 final class WebViewModel: ObservableObject {
+    private let retentionPolicy = WebViewRetentionPolicy(maxRetainedTabs: 3)
+
     @Published var urlString: String = ""
     @Published var isLoading: Bool = false
     @Published var canGoBack: Bool = false
@@ -21,12 +23,14 @@ final class WebViewModel: ObservableObject {
 
     // Tabs that have loaded once (avoid reloading initial URL)
     var loadedTabs: Set<String> = []
+    private(set) var recentlySelectedTabs: [String] = []
 
     var currentWebView: WKWebView? { webViews[selectedTab] }
 
     func switchTab(to key: String) {
         guard key != selectedTab else { return }
         selectedTab = key
+        markTabRecentlyUsed(key)
         syncActiveTabState()
     }
 
@@ -72,11 +76,20 @@ final class WebViewModel: ObservableObject {
         loadedTabs.remove(key)
     }
 
+    func retainedWebViewKeys(for sites: [SiteItem]) -> Set<String> {
+        retentionPolicy.retainedKeys(
+            selectedKey: selectedTab,
+            recentlySelectedKeys: recentlySelectedTabs,
+            availableKeys: Set(sites.map(\.key))
+        )
+    }
+
     /// Called when sites change; if current tab removed, switch to first
     func handleSitesChanged(newSites: [SiteItem]) {
         let newKeys = Set(newSites.map(\.key))
         // Prune loadedTabs for removed sites
         loadedTabs = loadedTabs.intersection(newKeys)
+        recentlySelectedTabs = recentlySelectedTabs.filter { newKeys.contains($0) }
 
         if newKeys.contains(selectedTab) { return }
 
@@ -85,6 +98,7 @@ final class WebViewModel: ObservableObject {
             switchTab(to: first.key)
         } else {
             selectedTab = ""
+            recentlySelectedTabs.removeAll()
             isLoading = false
             canGoBack = false
             canGoForward = false
@@ -92,6 +106,17 @@ final class WebViewModel: ObservableObject {
             pageTitle = ""
             estimatedProgress = 0
         }
+    }
+
+    func ensureSelectedTabIsTracked() {
+        guard !selectedTab.isEmpty else { return }
+        markTabRecentlyUsed(selectedTab)
+    }
+
+    private func markTabRecentlyUsed(_ key: String) {
+        guard !key.isEmpty else { return }
+        recentlySelectedTabs.removeAll { $0 == key }
+        recentlySelectedTabs.insert(key, at: 0)
     }
 }
 
@@ -107,5 +132,21 @@ struct HistoryItem: Identifiable, Codable {
         self.title = title
         self.url = url
         self.date = Date()
+    }
+}
+
+struct WebViewRetentionPolicy {
+    let maxRetainedTabs: Int
+
+    func retainedKeys(
+        selectedKey: String,
+        recentlySelectedKeys: [String],
+        availableKeys: Set<String>
+    ) -> Set<String> {
+        guard !selectedKey.isEmpty else { return [] }
+
+        let orderedKeys = [selectedKey] + recentlySelectedKeys.filter { $0 != selectedKey }
+        let filteredKeys = orderedKeys.filter { availableKeys.contains($0) }
+        return Set(filteredKeys.prefix(maxRetainedTabs))
     }
 }

@@ -14,8 +14,9 @@ struct WebViewRepresentable: NSViewRepresentable {
     func makeNSView(context: Context) -> NSView {
         let container = NSView()
         container.wantsLayer = true
+        let retainedKeys = viewModel.retainedWebViewKeys(for: sites)
 
-        for site in sites {
+        for site in sites where retainedKeys.contains(site.key) {
             addWebView(for: site, to: container, coordinator: context.coordinator)
         }
 
@@ -25,18 +26,22 @@ struct WebViewRepresentable: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: Context) {
         let currentKeys = Set(viewModel.webViews.keys)
         let newKeys = Set(sites.map(\.key))
+        let retainedKeys = viewModel.retainedWebViewKeys(for: sites)
 
-        // Remove WebViews for removed sites
-        for key in currentKeys.subtracting(newKeys) {
+        // Remove WebViews for removed sites or tabs we no longer want to keep alive.
+        for key in currentKeys.subtracting(newKeys).union(currentKeys.subtracting(retainedKeys)) {
             if let wv = viewModel.webViews[key] {
+                wv.stopLoading()
+                wv.navigationDelegate = nil
+                wv.uiDelegate = nil
                 wv.removeFromSuperview()
                 context.coordinator.removeObservations(for: key)
                 viewModel.removeWebView(forKey: key)
             }
         }
 
-        // Add WebViews for new sites
-        for site in sites where !currentKeys.contains(site.key) {
+        // Add WebViews only for tabs we want to keep warm.
+        for site in sites where retainedKeys.contains(site.key) && viewModel.webViews[site.key] == nil {
             addWebView(for: site, to: nsView, coordinator: context.coordinator)
         }
 
@@ -212,6 +217,12 @@ struct WebViewRepresentable: NSViewRepresentable {
             let title = webView.title ?? ""
             let url = webView.url?.absoluteString ?? ""
             viewModel.addHistory(title: title, url: url)
+        }
+
+        func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+            if webView.url != nil {
+                webView.reload()
+            }
         }
 
         // MARK: - WKUIDelegate

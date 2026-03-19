@@ -61,7 +61,9 @@ struct MainView: View {
         .onAppear {
             // Sync selectedTab to first site on appear
             if viewModel.selectedTab.isEmpty, let first = store.sites.first {
-                viewModel.selectedTab = first.key
+                viewModel.switchTab(to: first.key)
+            } else {
+                viewModel.ensureSelectedTabIsTracked()
             }
         }
         .onChange(of: viewModel.currentURL) { _, newURL in
